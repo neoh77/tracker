@@ -1,0 +1,64 @@
+### Get all animals
+GET http://localhost:5000/api/animals
+Content-Type: application/json
+
+###
+
+### Get animal by ID
+GET http://localhost:5000/api/animals/1
+Content-Type: application/json
+
+###
+
+### Create new animal
+POST http://localhost:5000/api/animals
+Content-Type: application/json
+
+{
+  "name": "Test Snake",
+  "breed": "Ball Python",
+  "morph": "Normal",
+  "weight": 1200.5,
+  "lastFeedingDate": "2025-07-15T10:00:00Z"
+}
+
+###
+
+### Update animal
+PUT http://localhost:5000/api/animals/1
+Content-Type: application/json
+
+{
+  "name": "Updated Snake",
+  "weight": 1250.0
+}
+
+###
+
+### Delete animal
+DELETE http://localhost:5000/api/animals/1
+Content-Type: application/json
+
+###
+
+### Get weight history
+GET http://localhost:5000/api/animals/1/weight-history
+Content-Type: application/json
+
+###
+
+### Get feeding history
+GET http://localhost:5000/api/animals/1/feeding-history
+Content-Type: application/json
+
+###
+
+### Add feeding record
+POST http://localhost:5000/api/feedinghistory
+Content-Type: application/json
+
+{
+  "animalId": 1,
+  "feedingDate": "2025-07-18T14:30:00Z",
+  "notes": "Fed frozen/thawed adult mouse"
+}
