@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "/home/matt/repos/tracker/backend/TrackerApi/TrackerApi.csproj": {}
+    "/home/runner/work/tracker/tracker/backend/TrackerApi/TrackerApi.csproj": {}
   },
   "projects": {
-    "/home/matt/repos/tracker/backend/TrackerApi/TrackerApi.csproj": {
+    "/home/runner/work/tracker/tracker/backend/TrackerApi/TrackerApi.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/home/matt/repos/tracker/backend/TrackerApi/TrackerApi.csproj",
+        "projectUniqueName": "/home/runner/work/tracker/tracker/backend/TrackerApi/TrackerApi.csproj",
         "projectName": "TrackerApi",
-        "projectPath": "/home/matt/repos/tracker/backend/TrackerApi/TrackerApi.csproj",
-        "packagesPath": "/home/matt/.nuget/packages/",
-        "outputPath": "/home/matt/repos/tracker/backend/TrackerApi/obj/",
+        "projectPath": "/home/runner/work/tracker/tracker/backend/TrackerApi/TrackerApi.csproj",
+        "packagesPath": "/home/runner/.nuget/packages/",
+        "outputPath": "/home/runner/work/tracker/tracker/backend/TrackerApi/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "/home/matt/.nuget/NuGet/NuGet.Config"
+          "/home/runner/.nuget/NuGet/NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -32,11 +32,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -87,7 +82,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "/snap/dotnet-sdk/256/sdk/8.0.407/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "/usr/lib/dotnet/sdk/8.0.117/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
