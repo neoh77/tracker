@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TrackerApi.Data;
 using TrackerApi.DTOs;
 using TrackerApi.Models;
+using TrackerApi.Extensions;
 
 namespace TrackerApi.Controllers;
 
@@ -19,36 +20,29 @@ public class AnimalsController : ControllerBase
 
     // GET: api/Animals
     [HttpGet]
+    [ResponseCache(Duration = 30, VaryByQueryKeys = new[] { "search" })]
     public async Task<ActionResult<IEnumerable<AnimalDto>>> GetAnimals([FromQuery] string? search = null)
     {
         var query = _context.Animals.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(a => a.Name.Contains(search) || (a.Breed != null && a.Breed.Contains(search)));
+            query = query.Where(a => EF.Functions.ILike(a.Name, $"%{search}%") || 
+                                   (a.Breed != null && EF.Functions.ILike(a.Breed, $"%{search}%")));
         }
 
         var animals = await query
             .OrderBy(a => a.Name)
-            .Select(a => new AnimalDto
-            {
-                Id = a.Id,
-                Name = a.Name,
-                Breed = a.Breed,
-                Morph = a.Morph,
-                Weight = a.Weight,
-                LastFeedingDate = a.LastFeedingDate,
-                FeedingFrequencyDays = a.FeedingFrequencyDays,
-                CreatedAt = a.CreatedAt,
-                UpdatedAt = a.UpdatedAt
-            })
             .ToListAsync();
 
-        return Ok(animals);
+        var animalDtos = animals.Select(a => a.ToDto()).ToList();
+
+        return Ok(animalDtos);
     }
 
     // GET: api/Animals/5
     [HttpGet("{id}")]
+    [ResponseCache(Duration = 60)]
     public async Task<ActionResult<AnimalDto>> GetAnimal(int id)
     {
         var animal = await _context.Animals.FindAsync(id);
@@ -58,20 +52,7 @@ public class AnimalsController : ControllerBase
             return NotFound();
         }
 
-        var animalDto = new AnimalDto
-        {
-            Id = animal.Id,
-            Name = animal.Name,
-            Breed = animal.Breed,
-            Morph = animal.Morph,
-            Weight = animal.Weight,
-            LastFeedingDate = animal.LastFeedingDate,
-            FeedingFrequencyDays = animal.FeedingFrequencyDays,
-            CreatedAt = animal.CreatedAt,
-            UpdatedAt = animal.UpdatedAt
-        };
-
-        return Ok(animalDto);
+        return Ok(animal.ToDto());
     }
 
     // POST: api/Animals
@@ -90,36 +71,34 @@ public class AnimalsController : ControllerBase
             UpdatedAt = DateTime.UtcNow
         };
 
-        _context.Animals.Add(animal);
-        await _context.SaveChangesAsync();
-
-        // Add weight history if weight is provided
-        if (animal.Weight.HasValue)
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
         {
-            var weightHistory = new WeightHistory
-            {
-                AnimalId = animal.Id,
-                Weight = animal.Weight.Value,
-                RecordedAt = DateTime.UtcNow
-            };
-            _context.WeightHistories.Add(weightHistory);
+            _context.Animals.Add(animal);
             await _context.SaveChangesAsync();
+
+            // Add weight history if weight is provided
+            if (animal.Weight.HasValue)
+            {
+                var weightHistory = new WeightHistory
+                {
+                    AnimalId = animal.Id,
+                    Weight = animal.Weight.Value,
+                    RecordedAt = DateTime.UtcNow
+                };
+                _context.WeightHistories.Add(weightHistory);
+                await _context.SaveChangesAsync();
+            }
+
+            await transaction.CommitAsync();
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
         }
 
-        var animalDto = new AnimalDto
-        {
-            Id = animal.Id,
-            Name = animal.Name,
-            Breed = animal.Breed,
-            Morph = animal.Morph,
-            Weight = animal.Weight,
-            LastFeedingDate = animal.LastFeedingDate,
-            FeedingFrequencyDays = animal.FeedingFrequencyDays,
-            CreatedAt = animal.CreatedAt,
-            UpdatedAt = animal.UpdatedAt
-        };
-
-        return CreatedAtAction(nameof(GetAnimal), new { id = animal.Id }, animalDto);
+        return CreatedAtAction(nameof(GetAnimal), new { id = animal.Id }, animal.ToDto());
     }
 
     // PUT: api/Animals/5
@@ -156,6 +135,7 @@ public class AnimalsController : ControllerBase
 
         animal.UpdatedAt = DateTime.UtcNow;
 
+        using var transaction = await _context.Database.BeginTransactionAsync();
         try
         {
             await _context.SaveChangesAsync();
@@ -172,9 +152,12 @@ public class AnimalsController : ControllerBase
                 _context.WeightHistories.Add(weightHistory);
                 await _context.SaveChangesAsync();
             }
+
+            await transaction.CommitAsync();
         }
         catch (DbUpdateConcurrencyException)
         {
+            await transaction.RollbackAsync();
             if (!AnimalExists(id))
             {
                 return NotFound();
@@ -183,6 +166,11 @@ public class AnimalsController : ControllerBase
             {
                 throw;
             }
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
         }
 
         return NoContent();
@@ -206,6 +194,7 @@ public class AnimalsController : ControllerBase
 
     // GET: api/Animals/5/weight-history
     [HttpGet("{id}/weight-history")]
+    [ResponseCache(Duration = 60)]
     public async Task<ActionResult<IEnumerable<WeightHistoryDto>>> GetAnimalWeightHistory(int id)
     {
         var animal = await _context.Animals.FindAsync(id);
@@ -217,20 +206,16 @@ public class AnimalsController : ControllerBase
         var weightHistory = await _context.WeightHistories
             .Where(wh => wh.AnimalId == id)
             .OrderBy(wh => wh.RecordedAt)
-            .Select(wh => new WeightHistoryDto
-            {
-                Id = wh.Id,
-                AnimalId = wh.AnimalId,
-                Weight = wh.Weight,
-                RecordedAt = wh.RecordedAt
-            })
             .ToListAsync();
 
-        return Ok(weightHistory);
+        var weightHistoryDtos = weightHistory.Select(wh => wh.ToDto()).ToList();
+
+        return Ok(weightHistoryDtos);
     }
 
     // GET: api/Animals/5/feeding-history
     [HttpGet("{id}/feeding-history")]
+    [ResponseCache(Duration = 60)]
     public async Task<ActionResult<IEnumerable<FeedingHistoryDto>>> GetAnimalFeedingHistory(int id)
     {
         var animal = await _context.Animals.FindAsync(id);
@@ -242,17 +227,11 @@ public class AnimalsController : ControllerBase
         var feedingHistory = await _context.FeedingHistories
             .Where(fh => fh.AnimalId == id)
             .OrderByDescending(fh => fh.FeedingDate)
-            .Select(fh => new FeedingHistoryDto
-            {
-                Id = fh.Id,
-                AnimalId = fh.AnimalId,
-                FeedingDate = fh.FeedingDate,
-                Notes = fh.Notes,
-                CreatedAt = fh.CreatedAt
-            })
             .ToListAsync();
 
-        return Ok(feedingHistory);
+        var feedingHistoryDtos = feedingHistory.Select(fh => fh.ToDto()).ToList();
+
+        return Ok(feedingHistoryDtos);
     }
 
     private bool AnimalExists(int id)
