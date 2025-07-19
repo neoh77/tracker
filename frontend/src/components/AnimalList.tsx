@@ -119,6 +119,108 @@ const AnimalList: React.FC = () => {
           ))}
         </div>
       )}
+
+      {animals.length > 0 && (
+        <div className="feeding-summary">
+          <h2>Upcoming Feedings</h2>
+          <div className="upcoming-feedings">
+            {(() => {
+              const upcomingFeedings = animals
+                .map((animal) => {
+                  const daysSinceLastFed = animal.lastFeedingDate 
+                    ? Math.floor((new Date().getTime() - new Date(animal.lastFeedingDate).getTime()) / (1000 * 3600 * 24))
+                    : null;
+                  
+                  const feedingFrequency = animal.feedingFrequencyDays || 7;
+                  const daysOverdue = daysSinceLastFed !== null ? daysSinceLastFed - feedingFrequency : null;
+                  
+                  const getStatus = (daysOverdue: number | null) => {
+                    if (daysSinceLastFed === null) return 'never-fed';
+                    if (daysOverdue === null) return 'never-fed';
+                    if (daysOverdue >= 0) return 'overdue';
+                    if (daysOverdue >= -1) return 'due-today';
+                    if (daysOverdue >= -2) return 'due-soon';
+                    return 'recent';
+                  };
+
+                  const getPriority = (daysOverdue: number | null) => {
+                    if (daysSinceLastFed === null) return 4; // Never fed - highest priority
+                    if (daysOverdue === null) return 4;
+                    if (daysOverdue >= 1) return 3; // Overdue
+                    if (daysOverdue >= 0) return 2; // Due today
+                    if (daysOverdue >= -2) return 1; // Due soon
+                    return 0; // Recent, don't show
+                  };
+
+                  const isDueToday = daysOverdue !== null && daysOverdue >= 0;
+
+                  return {
+                    ...animal,
+                    daysSinceLastFed,
+                    daysOverdue,
+                    isDueToday,
+                    status: getStatus(daysOverdue),
+                    priority: getPriority(daysOverdue)
+                  };
+                })
+                .filter(animal => animal.priority >= 1) // Show animals that need feeding soon or are overdue
+                .sort((a, b) => b.priority - a.priority); // Sort by priority (highest first)
+
+              if (upcomingFeedings.length === 0) {
+                return (
+                  <div className="no-upcoming-feedings">
+                    <p>🎉 All animals have been fed recently!</p>
+                  </div>
+                );
+              }
+
+              return (
+                <div className="feeding-cards">
+                  {upcomingFeedings.map((animal) => (
+                    <div key={animal.id} className={`feeding-card priority-${animal.priority}`}>
+                      <div className="feeding-card-header">
+                        <h3>
+                          <Link to={`/animal/${animal.id}`} className="animal-link">
+                            {animal.name}
+                          </Link>
+                          {animal.isDueToday && <span className="feed-today-badge">FEED TODAY</span>}
+                        </h3>
+                        <span className={`status-badge status-${animal.status}`}>
+                          {animal.daysSinceLastFed === null ? 'Never Fed' : 
+                           animal.status === 'overdue' ? 'Overdue' :
+                           animal.status === 'due-today' ? 'Due Today' :
+                           animal.status === 'due-soon' ? 'Due Soon' : 'Recent'}
+                        </span>
+                      </div>
+                      <div className="feeding-card-details">
+                        {animal.breed && <p><strong>Breed:</strong> {animal.breed}</p>}
+                        <p><strong>Feeding Schedule:</strong> Every {animal.feedingFrequencyDays} days</p>
+                        <p><strong>Last Fed:</strong> {formatDate(animal.lastFeedingDate)}</p>
+                        <p><strong>Days Since:</strong> {
+                          animal.daysSinceLastFed !== null ? 
+                          `${animal.daysSinceLastFed} days ago` : 'Never'
+                        }</p>
+                        {animal.daysOverdue !== null && (
+                          <p><strong>Status:</strong> {
+                            animal.daysOverdue >= 0 ? 
+                            `${animal.daysOverdue} days overdue` : 
+                            `Due in ${Math.abs(animal.daysOverdue)} days`
+                          }</p>
+                        )}
+                      </div>
+                      <div className="feeding-card-actions">
+                        <Link to={`/animal/${animal.id}`} className="feed-now-button">
+                          Record Feeding
+                        </Link>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

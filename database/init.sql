@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS animals (
     morph VARCHAR(255),
     weight DECIMAL(10, 2),
     last_feeding_date TIMESTAMP,
+    feeding_frequency_days INTEGER DEFAULT 7,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
@@ -35,8 +36,8 @@ CREATE INDEX IF NOT EXISTS idx_feeding_history_animal_id ON feeding_history(anim
 CREATE INDEX IF NOT EXISTS idx_feeding_history_date ON feeding_history(feeding_date);
 
 -- Insert sample data
-INSERT INTO animals (name, breed, morph, weight, last_feeding_date) VALUES
-    ('Bella', 'Ball Python', 'Normal', 1500.00, '2025-07-15 10:00:00'),
-    ('Rex', 'Corn Snake', 'Anerythristic', 350.50, '2025-07-16 14:30:00'),
-    ('Luna', 'Ball Python', 'Pastel', 1200.75, '2025-07-17 09:15:00')
+INSERT INTO animals (name, breed, morph, weight, last_feeding_date, feeding_frequency_days) VALUES
+    ('Bella', 'Ball Python', 'Normal', 1500.00, '2025-07-15 10:00:00', 14),
+    ('Rex', 'Corn Snake', 'Anerythristic', 350.50, '2025-07-16 14:30:00', 7),
+    ('Luna', 'Ball Python', 'Pastel', 1200.75, '2025-07-17 09:15:00', 10)
 ON CONFLICT DO NOTHING;
