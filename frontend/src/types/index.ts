@@ -1,20 +1,22 @@
 export interface Animal {
   id: number;
   name: string;
-  breed?: string;
+  breed: string;
   morph?: string;
   weight?: number;
   lastFeedingDate?: string;
+  feedingFrequencyDays: number;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface CreateAnimalDto {
   name: string;
-  breed?: string;
+  breed: string;
   morph?: string;
   weight?: number;
   lastFeedingDate?: string;
+  feedingFrequencyDays?: number;
 }
 
 export interface UpdateAnimalDto {
@@ -23,6 +25,7 @@ export interface UpdateAnimalDto {
   morph?: string;
   weight?: number;
   lastFeedingDate?: string;
+  feedingFrequencyDays?: number;
 }
 
 export interface WeightHistory {

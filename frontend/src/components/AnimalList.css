@@ -202,4 +202,191 @@
   .search-input {
     min-width: auto;
   }
+  
+  .feeding-cards {
+    grid-template-columns: 1fr;
+  }
+  
+  .feeding-card-header {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .feeding-card-actions {
+    text-align: center;
+  }
+}
+
+/* Feeding Summary Styles */
+.feeding-summary {
+  margin-top: 40px;
+  background: white;
+  border-radius: 8px;
+  padding: 25px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.feeding-summary h2 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 24px;
+  border-bottom: 2px solid #ff6b35;
+  padding-bottom: 10px;
+}
+
+.no-upcoming-feedings {
+  text-align: center;
+  padding: 40px 20px;
+  color: #28a745;
+  font-size: 18px;
+  background-color: #d4edda;
+  border-radius: 8px;
+  border: 1px solid #c3e6cb;
+}
+
+.feeding-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.feeding-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  border-left: 4px solid #ddd;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.feeding-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.priority-4 {
+  border-left-color: #dc3545;
+  background: linear-gradient(135deg, #fff 0%, #fff5f5 100%);
+}
+
+.priority-3 {
+  border-left-color: #fd7e14;
+  background: linear-gradient(135deg, #fff 0%, #fffaf7 100%);
+}
+
+.priority-2 {
+  border-left-color: #ffc107;
+  background: linear-gradient(135deg, #fff 0%, #fffdf7 100%);
+}
+
+.feeding-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.feeding-card-header h3 {
+  margin: 0;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.feed-today-badge {
+  background: linear-gradient(45deg, #ff4444, #ff6666);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(255, 68, 68, 0.3);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+.feeding-card-details p {
+  margin: 8px 0;
+  color: #555;
+  font-size: 14px;
+}
+
+.feeding-card-details strong {
+  color: #333;
+}
+
+.feeding-card-actions {
+  margin-top: 15px;
+  text-align: right;
+}
+
+.feed-now-button {
+  background-color: #28a745;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 12px;
+  transition: background-color 0.3s;
+  display: inline-block;
+}
+
+.feed-now-button:hover {
+  background-color: #218838;
+  color: white;
+}
+
+.animal-link {
+  color: #007bff;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.animal-link:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+.status-badge {
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-recent {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.status-due-soon {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.status-due-today {
+  background-color: #ff6b35;
+  color: white;
+  font-weight: bold;
+}
+
+.status-overdue {
+  background-color: #f8d7da;
+  color: #721c24;
+}
+
+.status-never-fed {
+  background-color: #f8d7da;
+  color: #721c24;
 }

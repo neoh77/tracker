@@ -23,6 +23,9 @@ public class Animal
     
     public DateTime? LastFeedingDate { get; set; }
     
+    [Column("feeding_frequency_days")]
+    public int FeedingFrequencyDays { get; set; } = 7;
+    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

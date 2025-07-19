@@ -38,6 +38,7 @@ public class AnimalsController : ControllerBase
                 Morph = a.Morph,
                 Weight = a.Weight,
                 LastFeedingDate = a.LastFeedingDate,
+                FeedingFrequencyDays = a.FeedingFrequencyDays,
                 CreatedAt = a.CreatedAt,
                 UpdatedAt = a.UpdatedAt
             })
@@ -65,6 +66,7 @@ public class AnimalsController : ControllerBase
             Morph = animal.Morph,
             Weight = animal.Weight,
             LastFeedingDate = animal.LastFeedingDate,
+            FeedingFrequencyDays = animal.FeedingFrequencyDays,
             CreatedAt = animal.CreatedAt,
             UpdatedAt = animal.UpdatedAt
         };
@@ -83,6 +85,7 @@ public class AnimalsController : ControllerBase
             Morph = createAnimalDto.Morph,
             Weight = createAnimalDto.Weight,
             LastFeedingDate = createAnimalDto.LastFeedingDate,
+            FeedingFrequencyDays = createAnimalDto.FeedingFrequencyDays,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -111,6 +114,7 @@ public class AnimalsController : ControllerBase
             Morph = animal.Morph,
             Weight = animal.Weight,
             LastFeedingDate = animal.LastFeedingDate,
+            FeedingFrequencyDays = animal.FeedingFrequencyDays,
             CreatedAt = animal.CreatedAt,
             UpdatedAt = animal.UpdatedAt
         };
@@ -146,6 +150,9 @@ public class AnimalsController : ControllerBase
         
         if (updateAnimalDto.LastFeedingDate.HasValue)
             animal.LastFeedingDate = updateAnimalDto.LastFeedingDate;
+
+        if (updateAnimalDto.FeedingFrequencyDays.HasValue)
+            animal.FeedingFrequencyDays = updateAnimalDto.FeedingFrequencyDays.Value;
 
         animal.UpdatedAt = DateTime.UtcNow;
 

@@ -19,7 +19,8 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ mode }) => {
     breed: '',
     morph: '',
     weight: '',
-    lastFeedingDate: ''
+    lastFeedingDate: '',
+    feedingFrequencyDays: '7'
   });
 
   useEffect(() => {
@@ -38,7 +39,8 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ mode }) => {
         morph: animal.morph || '',
         weight: animal.weight ? animal.weight.toString() : '',
         lastFeedingDate: animal.lastFeedingDate ? 
-          new Date(animal.lastFeedingDate).toISOString().split('T')[0] : ''
+          new Date(animal.lastFeedingDate).toISOString().split('T')[0] : '',
+        feedingFrequencyDays: animal.feedingFrequencyDays.toString()
       });
     } catch (err) {
       setError('Failed to fetch animal details');
@@ -70,7 +72,8 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ mode }) => {
         breed: formData.breed.trim() || undefined,
         morph: formData.morph.trim() || undefined,
         weight: formData.weight ? parseFloat(formData.weight) : undefined,
-        lastFeedingDate: formData.lastFeedingDate ? new Date(formData.lastFeedingDate).toISOString() : undefined
+        lastFeedingDate: formData.lastFeedingDate ? new Date(formData.lastFeedingDate).toISOString() : undefined,
+        feedingFrequencyDays: formData.feedingFrequencyDays ? parseInt(formData.feedingFrequencyDays) : 7
       };
 
       if (mode === 'add') {
@@ -167,6 +170,20 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ mode }) => {
             name="lastFeedingDate"
             value={formData.lastFeedingDate}
             onChange={handleChange}
+          />
+        </div>
+
+        <div className="form-group">
+          <label htmlFor="feedingFrequencyDays">Feeding Frequency (days)</label>
+          <input
+            type="number"
+            id="feedingFrequencyDays"
+            name="feedingFrequencyDays"
+            value={formData.feedingFrequencyDays}
+            onChange={handleChange}
+            min="1"
+            max="365"
+            placeholder="How often to feed (in days)"
           />
         </div>
 
