@@ -20,13 +20,15 @@ public class AnimalsController : ControllerBase
 
     // GET: api/Animals
     [HttpGet]
+    [ResponseCache(Duration = 30, VaryByQueryKeys = new[] { "search" })]
     public async Task<ActionResult<IEnumerable<AnimalDto>>> GetAnimals([FromQuery] string? search = null)
     {
         var query = _context.Animals.AsQueryable();
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(a => a.Name.Contains(search) || (a.Breed != null && a.Breed.Contains(search)));
+            query = query.Where(a => EF.Functions.ILike(a.Name, $"%{search}%") || 
+                                   (a.Breed != null && EF.Functions.ILike(a.Breed, $"%{search}%")));
         }
 
         var animals = await query
@@ -40,6 +42,7 @@ public class AnimalsController : ControllerBase
 
     // GET: api/Animals/5
     [HttpGet("{id}")]
+    [ResponseCache(Duration = 60)]
     public async Task<ActionResult<AnimalDto>> GetAnimal(int id)
     {
         var animal = await _context.Animals.FindAsync(id);
@@ -191,6 +194,7 @@ public class AnimalsController : ControllerBase
 
     // GET: api/Animals/5/weight-history
     [HttpGet("{id}/weight-history")]
+    [ResponseCache(Duration = 60)]
     public async Task<ActionResult<IEnumerable<WeightHistoryDto>>> GetAnimalWeightHistory(int id)
     {
         var animal = await _context.Animals.FindAsync(id);
@@ -211,6 +215,7 @@ public class AnimalsController : ControllerBase
 
     // GET: api/Animals/5/feeding-history
     [HttpGet("{id}/feeding-history")]
+    [ResponseCache(Duration = 60)]
     public async Task<ActionResult<IEnumerable<FeedingHistoryDto>>> GetAnimalFeedingHistory(int id)
     {
         var animal = await _context.Animals.FindAsync(id);

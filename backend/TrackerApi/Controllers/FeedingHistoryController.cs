@@ -20,6 +20,7 @@ public class FeedingHistoryController : ControllerBase
 
     // GET: api/FeedingHistory
     [HttpGet]
+    [ResponseCache(Duration = 30, VaryByQueryKeys = new[] { "animalId" })]
     public async Task<ActionResult<IEnumerable<FeedingHistoryDto>>> GetFeedingHistory([FromQuery] int? animalId = null)
     {
         var query = _context.FeedingHistories.AsQueryable();
