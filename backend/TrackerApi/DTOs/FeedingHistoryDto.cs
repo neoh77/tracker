@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace TrackerApi.DTOs;
 
 public class FeedingHistoryDto
@@ -11,7 +13,12 @@ public class FeedingHistoryDto
 
 public class CreateFeedingHistoryDto
 {
+    [Required]
     public int AnimalId { get; set; }
+    
+    [Required]
     public DateTime FeedingDate { get; set; }
+    
+    [StringLength(1000)]
     public string? Notes { get; set; }
 }

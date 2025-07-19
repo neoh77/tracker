@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TrackerApi.Data;
 using TrackerApi.DTOs;
 using TrackerApi.Models;
+using TrackerApi.Extensions;
 
 namespace TrackerApi.Controllers;
 
@@ -30,26 +31,20 @@ public class FeedingHistoryController : ControllerBase
 
         var feedingHistory = await query
             .OrderByDescending(fh => fh.FeedingDate)
-            .Select(fh => new FeedingHistoryDto
-            {
-                Id = fh.Id,
-                AnimalId = fh.AnimalId,
-                FeedingDate = fh.FeedingDate,
-                Notes = fh.Notes,
-                CreatedAt = fh.CreatedAt
-            })
             .ToListAsync();
 
-        return Ok(feedingHistory);
+        var feedingHistoryDtos = feedingHistory.Select(fh => fh.ToDto()).ToList();
+
+        return Ok(feedingHistoryDtos);
     }
 
     // POST: api/FeedingHistory
     [HttpPost]
     public async Task<ActionResult<FeedingHistoryDto>> PostFeedingHistory(CreateFeedingHistoryDto createFeedingHistoryDto)
     {
-        // Check if animal exists
-        var animalExists = await _context.Animals.AnyAsync(a => a.Id == createFeedingHistoryDto.AnimalId);
-        if (!animalExists)
+        // Find animal and check if it exists
+        var animal = await _context.Animals.FindAsync(createFeedingHistoryDto.AnimalId);
+        if (animal == null)
         {
             return BadRequest("Animal not found");
         }
@@ -65,25 +60,12 @@ public class FeedingHistoryController : ControllerBase
         _context.FeedingHistories.Add(feedingHistory);
 
         // Update animal's last feeding date
-        var animal = await _context.Animals.FindAsync(createFeedingHistoryDto.AnimalId);
-        if (animal != null)
-        {
-            animal.LastFeedingDate = createFeedingHistoryDto.FeedingDate;
-            animal.UpdatedAt = DateTime.UtcNow;
-        }
+        animal.LastFeedingDate = createFeedingHistoryDto.FeedingDate;
+        animal.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
 
-        var feedingHistoryDto = new FeedingHistoryDto
-        {
-            Id = feedingHistory.Id,
-            AnimalId = feedingHistory.AnimalId,
-            FeedingDate = feedingHistory.FeedingDate,
-            Notes = feedingHistory.Notes,
-            CreatedAt = feedingHistory.CreatedAt
-        };
-
-        return CreatedAtAction(nameof(GetFeedingHistory), new { id = feedingHistory.Id }, feedingHistoryDto);
+        return CreatedAtAction(nameof(GetFeedingHistory), new { id = feedingHistory.Id }, feedingHistory.ToDto());
     }
 
     // DELETE: api/FeedingHistory/5
