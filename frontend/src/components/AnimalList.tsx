@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Animal } from '../types';
 import { animalService } from '../services/api';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import './AnimalList.css';
 
 const AnimalList: React.FC = () => {
@@ -9,6 +10,13 @@ const AnimalList: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   const fetchAnimals = async (search?: string) => {
     try {
@@ -60,8 +68,17 @@ const AnimalList: React.FC = () => {
 
   return (
     <div className="animal-list">
+      <nav className="top-nav">
+        <div className="nav-left">
+          <h1>Animal Tracker</h1>
+        </div>
+        <div className="nav-right">
+          <span className="user-info">Welcome, {user?.username}</span>
+          <button onClick={handleLogout} className="logout-button">Logout</button>
+        </div>
+      </nav>
+      
       <div className="header">
-        <h1>Animal Tracker</h1>
         <Link to="/add" className="add-button">Add New Animal</Link>
       </div>
       

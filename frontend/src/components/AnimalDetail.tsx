@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Animal, WeightHistory, FeedingHistory, CreateFeedingHistoryDto } from '../types';
 import { animalService, feedingService } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import './AnimalDetail.css';
 
 const AnimalDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [animal, setAnimal] = useState<Animal | null>(null);
   const [weightHistory, setWeightHistory] = useState<WeightHistory[]>([]);
   const [feedingHistory, setFeedingHistory] = useState<FeedingHistory[]>([]);
@@ -17,6 +19,11 @@ const AnimalDetail: React.FC = () => {
     feedingDate: new Date().toISOString().split('T')[0],
     notes: ''
   });
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
 
   useEffect(() => {
     if (id) {
@@ -87,15 +94,22 @@ const AnimalDetail: React.FC = () => {
 
   return (
     <div className="animal-detail">
+      <nav className="top-nav">
+        <div className="nav-left">
+          <h1>Animal Tracker</h1>
+        </div>
+        <div className="nav-right">
+          <span className="user-info">Welcome, {user?.username}</span>
+          <button onClick={handleLogout} className="logout-button">Logout</button>
+        </div>
+      </nav>
+      
       <div className="detail-header">
         <div className="header-left">
-          <h1>{animal.name}</h1>
-          <button 
-            onClick={() => navigate('/')}
-            className="back-button"
-          >
+          <h2>{animal.name}</h2>
+          <Link to="/" className="back-button">
             ← Back to List
-          </button>
+          </Link>
         </div>
         <div className="header-actions">
           <Link to={`/edit/${animal.id}`} className="edit-button">

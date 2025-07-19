@@ -1,9 +1,11 @@
 # Animal Tracker
 
-A web application for tracking animals including their weight history and feeding schedules.
+A web application for tracking animals including their weight history and feeding schedules with **multi-user authentication support**.
 
 ## Features
 
+- **User Authentication**: Secure JWT-based login and registration system
+- **Multi-User Support**: Each user has their own private set of animals
 - **Add Animal**: Form to input animal details (name, breed, morph, weight, last feeding date)
 - **View Animals**: List view of all animals with their details
 - **Weight History**: Track and display weight changes over time
@@ -67,6 +69,19 @@ docker-compose up -d
    - Backend API: http://localhost:5000
    - Database: localhost:5432
 
+4. Login with demo account:
+   - **Username**: `demo_user`
+   - **Password**: `password`
+
+### Authentication
+
+The application now supports multi-user functionality with JWT-based authentication:
+
+- **Registration**: Create a new account with username, email, and password
+- **Login**: Authenticate with username and password to receive a JWT token
+- **Demo Account**: Use `demo_user` / `password` to test with pre-populated data
+- **User Isolation**: Each user can only see and manage their own animals
+
 ### Local Development
 
 #### Backend Setup
@@ -105,20 +120,32 @@ Make sure PostgreSQL is running locally with the connection string specified in 
 
 ## API Endpoints
 
-### Animals
-- `GET /api/animals` - Get all animals (with optional search parameter)
-- `GET /api/animals/{id}` - Get specific animal
-- `POST /api/animals` - Create new animal
-- `PUT /api/animals/{id}` - Update animal
-- `DELETE /api/animals/{id}` - Delete animal
+### Authentication Endpoints
+- `POST /api/auth/login` - User login (returns JWT token)
+- `POST /api/auth/register` - User registration
+
+### Animals (Protected - Requires Authentication)
+- `GET /api/animals` - Get all animals for authenticated user (with optional search parameter)
+- `GET /api/animals/{id}` - Get specific animal (must belong to authenticated user)
+- `POST /api/animals` - Create new animal for authenticated user
+- `PUT /api/animals/{id}` - Update animal (must belong to authenticated user)
+- `DELETE /api/animals/{id}` - Delete animal (must belong to authenticated user)
 - `GET /api/animals/{id}/weight-history` - Get animal's weight history
 - `GET /api/animals/{id}/feeding-history` - Get animal's feeding history
 
-### Feeding History
-- `POST /api/feedinghistory` - Add feeding record
-- `DELETE /api/feedinghistory/{id}` - Delete feeding record
+### Feeding History (Protected - Requires Authentication)
+- `POST /api/feedinghistory` - Add feeding record (animal must belong to authenticated user)
+- `DELETE /api/feedinghistory/{id}` - Delete feeding record (must belong to authenticated user)
 
 ## Database Schema
+
+### Users Table
+- `id` (Serial, Primary Key)
+- `username` (VARCHAR(255), NOT NULL, UNIQUE)
+- `email` (VARCHAR(255), NOT NULL, UNIQUE)
+- `password_hash` (TEXT, NOT NULL)
+- `created_at` (TIMESTAMP)
+- `updated_at` (TIMESTAMP)
 
 ### Animals Table
 - `id` (Serial, Primary Key)
@@ -127,6 +154,7 @@ Make sure PostgreSQL is running locally with the connection string specified in 
 - `morph` (VARCHAR(255))
 - `weight` (DECIMAL(10,2))
 - `last_feeding_date` (TIMESTAMP)
+- `user_id` (INTEGER, Foreign Key to users.id, NOT NULL)
 - `created_at` (TIMESTAMP)
 - `updated_at` (TIMESTAMP)
 

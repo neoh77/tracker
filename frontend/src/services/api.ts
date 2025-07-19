@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Animal, CreateAnimalDto, UpdateAnimalDto, WeightHistory, FeedingHistory, CreateFeedingHistoryDto } from '../types';
+import { Animal, CreateAnimalDto, UpdateAnimalDto, WeightHistory, FeedingHistory, CreateFeedingHistoryDto, LoginDto, RegisterDto, AuthResponse } from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
 
@@ -9,6 +9,76 @@ const apiClient = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// Add request interceptor to include auth token
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Add response interceptor to handle auth errors
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Clear auth token and redirect to login
+      localStorage.removeItem('authToken');
+      localStorage.removeItem('authUser');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
+
+export const authService = {
+  async login(credentials: LoginDto): Promise<AuthResponse> {
+    const response = await apiClient.post('/auth/login', credentials);
+    const authData = response.data;
+    
+    // Store token and user data
+    localStorage.setItem('authToken', authData.token);
+    localStorage.setItem('authUser', JSON.stringify(authData.user));
+    
+    return authData;
+  },
+
+  async register(userData: RegisterDto): Promise<AuthResponse> {
+    const response = await apiClient.post('/auth/register', userData);
+    const authData = response.data;
+    
+    // Store token and user data
+    localStorage.setItem('authToken', authData.token);
+    localStorage.setItem('authUser', JSON.stringify(authData.user));
+    
+    return authData;
+  },
+
+  logout(): void {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('authUser');
+  },
+
+  getCurrentUser(): any {
+    const userData = localStorage.getItem('authUser');
+    return userData ? JSON.parse(userData) : null;
+  },
+
+  getToken(): string | null {
+    return localStorage.getItem('authToken');
+  },
+
+  isAuthenticated(): boolean {
+    return !!this.getToken();
+  }
+};
 
 export const animalService = {
   async getAnimals(search?: string): Promise<Animal[]> {

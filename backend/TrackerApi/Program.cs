@@ -1,5 +1,9 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 using TrackerApi.Data;
+using TrackerApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +18,30 @@ builder.Services.AddResponseCaching();
 // Add DbContext
 builder.Services.AddDbContext<TrackerDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add custom services
+builder.Services.AddScoped<ITokenService, TokenService>();
+builder.Services.AddScoped<IPasswordService, PasswordService>();
+
+// Add JWT Authentication
+var jwtSettings = builder.Configuration.GetSection("Jwt");
+var key = Encoding.UTF8.GetBytes(jwtSettings["Key"] ?? throw new InvalidOperationException("JWT Key not configured"));
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtSettings["Issuer"],
+            ValidAudience = jwtSettings["Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 // Add CORS
 builder.Services.AddCors(options =>
@@ -38,6 +66,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseResponseCaching();
 app.UseCors();
+
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
