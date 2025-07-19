@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 using TrackerApi.Data;
 using TrackerApi.DTOs;
 using TrackerApi.Models;
@@ -9,6 +11,7 @@ namespace TrackerApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize]
 public class AnimalsController : ControllerBase
 {
     private readonly TrackerDbContext _context;
@@ -18,12 +21,23 @@ public class AnimalsController : ControllerBase
         _context = context;
     }
 
+    private int GetUserId()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out int userId))
+        {
+            throw new UnauthorizedAccessException("Invalid user ID");
+        }
+        return userId;
+    }
+
     // GET: api/Animals
     [HttpGet]
     [ResponseCache(Duration = 30, VaryByQueryKeys = new[] { "search" })]
     public async Task<ActionResult<IEnumerable<AnimalDto>>> GetAnimals([FromQuery] string? search = null)
     {
-        var query = _context.Animals.AsQueryable();
+        var userId = GetUserId();
+        var query = _context.Animals.Where(a => a.UserId == userId);
 
         if (!string.IsNullOrWhiteSpace(search))
         {
@@ -45,7 +59,8 @@ public class AnimalsController : ControllerBase
     [ResponseCache(Duration = 60)]
     public async Task<ActionResult<AnimalDto>> GetAnimal(int id)
     {
-        var animal = await _context.Animals.FindAsync(id);
+        var userId = GetUserId();
+        var animal = await _context.Animals.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
 
         if (animal == null)
         {
@@ -59,6 +74,7 @@ public class AnimalsController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<AnimalDto>> PostAnimal(CreateAnimalDto createAnimalDto)
     {
+        var userId = GetUserId();
         var animal = new Animal
         {
             Name = createAnimalDto.Name,
@@ -67,6 +83,7 @@ public class AnimalsController : ControllerBase
             Weight = createAnimalDto.Weight,
             LastFeedingDate = createAnimalDto.LastFeedingDate,
             FeedingFrequencyDays = createAnimalDto.FeedingFrequencyDays,
+            UserId = userId,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
@@ -105,7 +122,8 @@ public class AnimalsController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> PutAnimal(int id, UpdateAnimalDto updateAnimalDto)
     {
-        var animal = await _context.Animals.FindAsync(id);
+        var userId = GetUserId();
+        var animal = await _context.Animals.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
         
         if (animal == null)
         {
@@ -158,7 +176,7 @@ public class AnimalsController : ControllerBase
         catch (DbUpdateConcurrencyException)
         {
             await transaction.RollbackAsync();
-            if (!AnimalExists(id))
+            if (!AnimalExists(id, userId))
             {
                 return NotFound();
             }
@@ -180,7 +198,8 @@ public class AnimalsController : ControllerBase
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteAnimal(int id)
     {
-        var animal = await _context.Animals.FindAsync(id);
+        var userId = GetUserId();
+        var animal = await _context.Animals.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
         if (animal == null)
         {
             return NotFound();
@@ -197,7 +216,8 @@ public class AnimalsController : ControllerBase
     [ResponseCache(Duration = 60)]
     public async Task<ActionResult<IEnumerable<WeightHistoryDto>>> GetAnimalWeightHistory(int id)
     {
-        var animal = await _context.Animals.FindAsync(id);
+        var userId = GetUserId();
+        var animal = await _context.Animals.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
         if (animal == null)
         {
             return NotFound();
@@ -218,7 +238,8 @@ public class AnimalsController : ControllerBase
     [ResponseCache(Duration = 60)]
     public async Task<ActionResult<IEnumerable<FeedingHistoryDto>>> GetAnimalFeedingHistory(int id)
     {
-        var animal = await _context.Animals.FindAsync(id);
+        var userId = GetUserId();
+        var animal = await _context.Animals.FirstOrDefaultAsync(a => a.Id == id && a.UserId == userId);
         if (animal == null)
         {
             return NotFound();
@@ -234,8 +255,8 @@ public class AnimalsController : ControllerBase
         return Ok(feedingHistoryDtos);
     }
 
-    private bool AnimalExists(int id)
+    private bool AnimalExists(int id, int userId)
     {
-        return _context.Animals.Any(e => e.Id == id);
+        return _context.Animals.Any(e => e.Id == id && e.UserId == userId);
     }
 }

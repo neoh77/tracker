@@ -30,7 +30,11 @@ public class Animal
     
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
+    // Foreign key for User
+    public int UserId { get; set; }
+    
     // Navigation properties
+    public User User { get; set; } = null!;
     public ICollection<WeightHistory> WeightHistories { get; set; } = new List<WeightHistory>();
     public ICollection<FeedingHistory> FeedingHistories { get; set; } = new List<FeedingHistory>();
 }

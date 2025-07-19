@@ -270,3 +270,12 @@
 /home/runner/work/tracker/tracker/backend/TrackerApi/obj/Debug/net8.0/TrackerApi.pdb
 /home/runner/work/tracker/tracker/backend/TrackerApi/obj/Debug/net8.0/TrackerApi.genruntimeconfig.cache
 /home/runner/work/tracker/tracker/backend/TrackerApi/obj/Debug/net8.0/ref/TrackerApi.dll
+/home/runner/work/tracker/tracker/backend/TrackerApi/bin/Debug/net8.0/Microsoft.AspNetCore.Authentication.JwtBearer.dll
+/home/runner/work/tracker/tracker/backend/TrackerApi/bin/Debug/net8.0/Microsoft.Bcl.TimeProvider.dll
+/home/runner/work/tracker/tracker/backend/TrackerApi/bin/Debug/net8.0/Microsoft.IdentityModel.Abstractions.dll
+/home/runner/work/tracker/tracker/backend/TrackerApi/bin/Debug/net8.0/Microsoft.IdentityModel.JsonWebTokens.dll
+/home/runner/work/tracker/tracker/backend/TrackerApi/bin/Debug/net8.0/Microsoft.IdentityModel.Logging.dll
+/home/runner/work/tracker/tracker/backend/TrackerApi/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.dll
+/home/runner/work/tracker/tracker/backend/TrackerApi/bin/Debug/net8.0/Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
+/home/runner/work/tracker/tracker/backend/TrackerApi/bin/Debug/net8.0/Microsoft.IdentityModel.Tokens.dll
+/home/runner/work/tracker/tracker/backend/TrackerApi/bin/Debug/net8.0/System.IdentityModel.Tokens.Jwt.dll
