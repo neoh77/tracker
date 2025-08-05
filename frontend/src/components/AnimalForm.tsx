@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import { CreateAnimalDto, UpdateAnimalDto } from '../types';
 import { animalService } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
 import './AnimalForm.css';
 
 interface AnimalFormProps {
@@ -13,6 +14,12 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ mode }) => {
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { user, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
   
   const [formData, setFormData] = useState({
     name: '',
@@ -97,15 +104,21 @@ const AnimalForm: React.FC<AnimalFormProps> = ({ mode }) => {
 
   return (
     <div className="animal-form">
+      <nav className="top-nav">
+        <div className="nav-left">
+          <h1>Animal Tracker</h1>
+        </div>
+        <div className="nav-right">
+          <span className="user-info">Welcome, {user?.username}</span>
+          <button onClick={handleLogout} className="logout-button">Logout</button>
+        </div>
+      </nav>
+      
       <div className="form-header">
-        <h1>{mode === 'add' ? 'Add New Animal' : 'Edit Animal'}</h1>
-        <button 
-          type="button" 
-          onClick={() => navigate('/')}
-          className="back-button"
-        >
+        <h2>{mode === 'add' ? 'Add New Animal' : 'Edit Animal'}</h2>
+        <Link to="/" className="back-button">
           Back to List
-        </button>
+        </Link>
       </div>
 
       {error && <div className="error">{error}</div>}
